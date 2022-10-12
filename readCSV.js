@@ -1,4 +1,5 @@
-const { AwesomeGraphQLClient } = require('awesome-graphql-client');
+const { GraphQLClient } = require('graphql-request');
+const { gql } = require('graphql-request');
 const fetch = require('node-fetch');
 require('dotenv').config();
 const csvToJson =require("convert-csv-to-json");
@@ -30,16 +31,16 @@ const importCSV = async () => {
 const createContentEntry = async (variables) => {
     const GRAPHCMS_INSTANCE = process.env.GRAPHCMS_INSTANCE;
 
-    const client = new AwesomeGraphQLClient({
-        endpoint:
-            GRAPHCMS_INSTANCE,
-        fetch,
+    const hygraph = new GraphQLClient(
+      GRAPHCMS_INSTANCE,
+      {
         headers: {
-            Authorization: `Bearer ` + process.env.GRAPHCMS_TOKEN
+          Authorization: `Bearer ` + process.env.GRAPHCMS_TOKEN
         }
-    });
+      }
+    );
 
-    const query = `
+    const query = gql`
         mutation createAuthor($name: String, $portfolioLink: String) {
             createAuthor(data: { name: $name, portfolioLink: $portfolioLink }) {
             id
@@ -50,7 +51,7 @@ const createContentEntry = async (variables) => {
     `;
 
 
-    const author = await client.request(query, variables);
+    const author = await hygraph.request(query, variables);
 
     return author;
 };
