@@ -1,32 +1,44 @@
-const { newMigration, FieldType } = require("@graphcms/management");
 require('dotenv').config();
+const { Client } = require('@hygraph/management-sdk');
+const { SimpleFieldType, RelationalFieldType, VisibilityTypes } = require("@hygraph/management-sdk/dist/mgmtServerTypes");
 
-console.log(process.env.GRAPHCMS_INSTANCE);
-console.log(process.env.GRAPHCMS_TOKEN);
+var hygraphInstance = process.env.GRAPHCMS_INSTANCE;
+var hygraphToken = process.env.GRAPHCMS_TOKEN;
 
-const migration = newMigration({ 
-    endpoint: process.env.GRAPHCMS_INSTANCE, 
-    authToken: process.env.GRAPHCMS_TOKEN
+const client = new Client({
+  authToken: hygraphToken,
+  endpoint: hygraphInstance,
 });
 
-const author = migration.createModel({
-  apiId: "Author",
-  apiIdPlural: "Authors",
-  displayName: "Author",
-});
+const run = async () => {
+  client.createModel({
+    apiId: 'Author',
+    apiIdPlural: 'Authors',
+    displayName: 'Author',
+  });
 
-author.addSimpleField({
-  apiId: "name",
-  displayName: "Name",
-  isTitle: true,
-  type: FieldType.String
-});
-author.addSimpleField({
-  apiId: "portfolioLink",
-  displayName: "Portfolio Link",
-  type: FieldType.String,
-});
+  client.createSimpleField({
+      apiId: 'name',
+      displayName: 'Name',
+      type: SimpleFieldType.String,
+      modelApiId: 'Author',
+  });
 
-migration.run();
+  client.createSimpleField({
+    apiId: 'portfolioLink',
+    displayName: 'Portfolio Link',
+    type: SimpleFieldType.String,
+    modelApiId: 'Author',
+  });
 
-//TODO: Add Write permissions in order to publish authors
+
+  const result = await client.run(true);
+  if (result.errors) {
+    throw new Error(result.errors);
+  }
+  return result;
+};
+
+run()
+  .then((result) => console.log(`Finished migration at: ${result.finishedAt}`))
+  .catch((err) => console.error('Error: ', err));

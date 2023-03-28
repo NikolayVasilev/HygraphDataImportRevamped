@@ -67,7 +67,7 @@ app.get('/addRandomAuthor', async function (req, res)
 
   const query = gql`
     mutation createAuthor($name: String, $portfolioLink: String) {
-      createAuthor(data: { name: $name, portfolioLink: $portfolioLink, articles: {connect: {id: "cl95feexhvyix0auo306wnxh2"}}}) {
+      createAuthor(data: { name: $name, portfolioLink: $portfolioLink}) {
         id
         name
         portfolioLink
